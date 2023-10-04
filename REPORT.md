@@ -25,7 +25,7 @@
 ## Задание
 
 - Получить родословную европейской знати, преобразовать данные в предикаты языка Prolog.
-- Реализовать предикаты различных родственников, в том числе продиктованных вариантом задания (теща, зять). 
+- Реализовать предикаты различных родственников, в том числе продиктованных вариантом задания (свекровь, невестка). 
 - Создать предикат для определения степени родства двух людей. На его основе вывести предикаты для поиска родственников и определения их количества.
 
 ## Получение родословного дерева
@@ -122,8 +122,8 @@ cousine(Child1, Child2) :- child(Child1, Parent1), child(Child2, Parent2), sibli
 
 married(Wife, Husband) :- child(Child, Husband), child(Child, Wife), female(Wife), male(Husband).
 
-motherInLaw(MotherInLaw, SonInLaw) :- married(Wife, SonInLaw), mother(MotherInLaw, Wife).
-sonInLaw(SonInLaw, MotherInLaw) :- motherInLaw(MotherInLaw, SonInLaw).
+motherInLaw(MotherInLaw, DaughterInLaw) :- married(DaughterInLaw, Husband), mother(MotherInLaw, Husband).
+daughterInLaw(DaughterInLaw, MotherInLaw) :- motherInLaw(MotherInLaw, DaughterInLaw).
 ``` 
 
 Примеры работы некоторых предикатов:
@@ -135,11 +135,11 @@ Uncle = 'Святослав I, вел.кн. Киевский' .
 ?- married(Wife, 'Рюрик I, кн. Новгородский').
 Wife = 'Ефанда' .
 
-?- motherInLaw(MotherInLaw, 'Владимир I Святославич Святой, вел.кн. Киевский').
-MotherInLaw = 'Феофано (Анастасия)' .
+?- motherInLaw(MotherInLaw, 'Малуша').
+MotherInLaw = 'Ольга Мудрая, кн. Киевская' .
 
-?- sonInLaw(SonInLaw, 'Феофано (Анастасия)').
-SonInLaw = 'Владимир I Святославич Святой, вел.кн. Киевский' .
+?- daughterInLaw(DaughterInLaw, 'Ольга Мудрая, кн. Киевская')
+DaughterInLaw = 'Малуша' .
 ```
 
 ## Определение степени родства
@@ -256,9 +256,6 @@ relationshipBFS(Degree, P1, P2) :-
 ?- relationship(Degree, 'Ярополк I Святославич, вел.кн. Киевский', 'Олег Святославич, кн. Древлянский').
 Degree = brother .
 
-?- relationship(Degree, 'Феофано (Анастасия)', 'Владимир I Святославич Святой, вел.кн. Киевский').
-Degree = 'mother-in-law' .
-
 ?- relationshipBFS(Degree, 'Рюрик I, кн. Новгородский', 'Владимир I Святославич Святой, вел.кн. Киевский').
 Degree = "Рюрик I, кн. Новгородский is 3 generations older than Владимир I Святославич Святой, вел.кн. Киевский" .
 ```
@@ -302,8 +299,8 @@ All parents:
 Малуша
 Святослав I, вел.кн. Киевский
 
-?- request([did, 'Владимир I Святославич Святой, вел.кн. Киевский', have, 'mother-in-law']).
-Владимир I Святославич Святой, вел.кн. Киевский had mother-in-law
+?- request([did, 'Малуша', have, 'mother-in-law']).
+Малуша had mother-in-law
 
 ?- request([did, 'Владимир I Святославич Святой, вел.кн. Киевский', have, sister]).
 Владимир I Святославич Святой, вел.кн. Киевский didn't have sister

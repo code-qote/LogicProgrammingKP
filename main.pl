@@ -23,8 +23,8 @@ cousine(Child1, Child2) :- child(Child1, Parent1), child(Child2, Parent2), sibli
 
 married(Wife, Husband) :- child(Child, Husband), child(Child, Wife), female(Wife), male(Husband).
 
-motherInLaw(MotherInLaw, SonInLaw) :- married(Wife, SonInLaw), mother(MotherInLaw, Wife).
-sonInLaw(SonInLaw, MotherInLaw) :- motherInLaw(MotherInLaw, SonInLaw).
+motherInLaw(MotherInLaw, DaughterInLaw) :- married(DaughterInLaw, Husband), mother(MotherInLaw, Husband).
+daughterInLaw(DaughterInLaw, MotherInLaw) :- motherInLaw(MotherInLaw, DaughterInLaw).
 
 prolong([X|T], [Y,X|T]) :- child(Y, X).
 
@@ -105,8 +105,8 @@ relationship(Degree, P1, P2) :-
     Degree = 'mother-in-law'.
 
 relationship(Degree, P1, P2) :-
-    sonInLaw(P1, P2),
-    Degree = 'son-in-law'.
+    daughterInLaw(P1, P2),
+    Degree = 'daughter-in-law'.
 
 relationshipBFS(Degree, P1, P2) :-
     bfsStart(P1, P2, Path, 7),
