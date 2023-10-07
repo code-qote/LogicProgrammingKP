@@ -12,12 +12,12 @@ grandFather(Parent, Child) :- grandParent(Parent, Child), male(Parent).
 grandMother(Parent, Child) :- grandParent(Parent, Child), female(Parent).
 
 sibling(P1, P2) :- child(P1, X), child(P2, X), P1 \== P2.
-brother(Child, Brother) :- sibling(Child, Brother), male(Brother).
-sister(Child, Sister) :- sibling(Child, Sister), female(Sister).
+brother(Brother, Child) :- sibling(Child, Brother), male(Brother).
+sister(Sister, Child) :- sibling(Child, Sister), female(Sister).
 
-uncle(Child, Uncle) :- child(Child, Parent), brother(Parent, Uncle).
-aunt(Child, Aunt) :- child(Child, Parent), sister(Parent, Aunt).
-nephew(Child, Person) :- uncle(Child, Person); aunt(Child, Person).
+uncle(Uncle, Child) :- child(Child, Parent), brother(Uncle, Parent).
+aunt(Aunt, Child) :- child(Child, Parent), sister(Aunt, Parent).
+nephew(Child, Person) :- uncle(Person, Child); aunt(Person, Child).
 
 cousine(Child1, Child2) :- child(Child1, Parent1), child(Child2, Parent2), sibling(Parent1, Parent2).
 
@@ -53,7 +53,7 @@ relationship(Degree, P1, P2) :-
     Degree = 'father'.
 
 relationship(Degree, P1, P2) :-
-    mother(P2, P1),
+    mother(P1, P2),
     Degree = 'mother'.
 
 relationship(Degree, P1, P2) :-
@@ -152,6 +152,9 @@ pluralToSingular(Words, Word) :-
     N1 is N - 1,
     sub_atom(Words, 0, N1, _, Word).
 
+toWritePlural(Word, 1, R) :- pluralToSingular(Word, R).
+toWritePlural(Word, _, R) :- R = Word.
+
 whoIsTo([Who, Is, P1, To, P2]) :-
     who(Who), is(Is), to(To),
     relationship(Res, P1, P2), !,
@@ -171,7 +174,8 @@ howMany([How, Many, Degrees, Did, P, Have]) :-
     how(How), many(Many), did(Did), have(Have),
     pluralToSingular(Degrees, Degree),
     countRelatives(Degree, P, Res),
-    atomics_to_string([P, ' had ', Res, ' ', Degrees], R),
+    toWritePlural(Degrees, Res, WPlural),
+    atomics_to_string([P, ' had ', Res, ' ', WPlural], R),
     write(R).
 
 didHave([Did, P, Have, Degree]) :-
@@ -200,16 +204,19 @@ allOf([All, Degrees, Of, P]) :-
     writeList(R).
 
 request(Words) :-
-    whoIsTo(Words).
+    whoIsTo(Words), !.
 
 request(Words) :-
-    howMany(Words).
+    howMany(Words), !.
 
 request(Words) :-
-    didHave(Words).
+    didHave(Words), !.
 
 request(Words) :-
-    allOf(Words).
+    allOf(Words), !.
+
+request(_) :-
+    write('Incorrect request').
 
 loop :-
     write('Ask questions in format "[my, cool, question]."\n'),

@@ -30,7 +30,8 @@
 
 ## Получение родословного дерева
 
-Я получил родословное дерево, скачав его по [ссылке](http://www.rusgenealog.ru/gedcom/royal_gen.zip). Общее количество индивидуумов в нем - 24901.
+Я получил родословное дерево, скачав его по [ссылке](http://www.rusgenealog.ru/gedcom/royal_gen.zip).
+Общее количество индивидуумов в нем - 24901.
 
 ## Конвертация родословного дерева
 
@@ -81,7 +82,7 @@ with open('tree.pl', 'w') as file:
                     res.append(f"father('{parent[0]}', '{child[0]}').")
                 else:
                     res.append(f"mother('{parent[0]}', '{child[0]}').")
-    res.sort(key=lambda x: x[0]) # сортируем, чтобы сначала шли все отцы, потом матери
+    res.sort(key=lambda x: x[0]) # сортируем так, чтобы сначала шли все отцы, потом матери
     for i in res:
         print(i, file=file)
 ```
@@ -111,12 +112,12 @@ grandFather(Parent, Child) :- grandParent(Parent, Child), male(Parent).
 grandMother(Parent, Child) :- grandParent(Parent, Child), female(Parent).
 
 sibling(P1, P2) :- child(P1, X), child(P2, X), P1 \== P2.
-brother(Child, Brother) :- sibling(Child, Brother), male(Brother).
-sister(Child, Sister) :- sibling(Child, Sister), female(Sister).
+brother(Brother, Child) :- sibling(Child, Brother), male(Brother).
+sister(Sister, Child) :- sibling(Child, Sister), female(Sister).
 
-uncle(Child, Uncle) :- child(Child, Parent), brother(Parent, Uncle).
-aunt(Child, Aunt) :- child(Child, Parent), sister(Parent, Aunt).
-nephew(Child, Person) :- uncle(Child, Person); aunt(Child, Person).
+uncle(Uncle, Child) :- child(Child, Parent), brother(Uncle, Parent).
+aunt(Aunt, Child) :- child(Child, Parent), sister(Aunt, Parent).
+nephew(Child, Person) :- uncle(Person, Child); aunt(Person, Child).
 
 cousine(Child1, Child2) :- child(Child1, Parent1), child(Child2, Parent2), sibling(Parent1, Parent2).
 
@@ -129,9 +130,6 @@ daughterInLaw(DaughterInLaw, MotherInLaw) :- motherInLaw(MotherInLaw, DaughterIn
 Примеры работы некоторых предикатов:
 
 ```shell
-?- uncle(Uncle, 'Олег Младший, кн. Ладожский').
-Uncle = 'Святослав I, вел.кн. Киевский' .
-
 ?- married(Wife, 'Рюрик I, кн. Новгородский').
 Wife = 'Ефанда' .
 
@@ -229,8 +227,8 @@ relationship(Degree, P1, P2) :-
     Degree = 'mother-in-law'.
 
 relationship(Degree, P1, P2) :-
-    sonInLaw(P1, P2),
-    Degree = 'son-in-law'.
+    daughterInLaw(P1, P2),
+    Degree = 'daughter-in-law'.
 ```
 
 Отдельно определим предикат, который будет использоваться для дальних родственников. В `Degree` будет записано то, насколько поколений один человек старше другого.
@@ -253,7 +251,7 @@ relationshipBFS(Degree, P1, P2) :-
 
 Приведем примеры работы этих предикатов:
 ```shell
-?- relationship(Degree, 'Ярополк I Святославич, вел.кн. Киевский', 'Олег Святославич, кн. Древлянский').
+?- relationship(Degree, 'Владимир I Святославич Святой, вел.кн. Киевский', 'Олег Святославич, кн. Древлянский').
 Degree = brother .
 
 ?- relationshipBFS(Degree, 'Рюрик I, кн. Новгородский', 'Владимир I Святославич Святой, вел.кн. Киевский').
@@ -281,8 +279,8 @@ Degree = "Рюрик I, кн. Новгородский is 3 generations older th
 ?- request([how, many, children, did, 'Владимир I Святославич Святой, вел.кн. Киевский', have]).
 Владимир I Святославич Святой, вел.кн. Киевский had 16 children
 
-?- request([who, is, 'Ярополк I Святославич, вел.кн. Киевский', to, 'Владимир I Святославич Святой, вел.кн. Киевский']).
-Ярополк I Святославич, вел.кн. Киевский is brother to Владимир I Святославич Святой, вел.кн. Киевский
+?- request([who, is, 'Владимир I Святославич Святой, вел.кн. Киевский', to, 'Олег Святославич, кн. Древлянский']).
+Владимир I Святославич Святой, вел.кн. Киевский is brother to Олег Святославич, кн. Древлянский
 
 ?- request([all, wives, of, 'Владимир I Святославич Святой, вел.кн. Киевский']).
 All wives:
