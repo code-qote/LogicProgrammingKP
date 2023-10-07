@@ -326,7 +326,13 @@ howMany([How, Many, Degrees, Did, P, Have]) :-
     how(How), many(Many), did(Did), have(Have),
     pluralToSingular(Degrees, Degree),
     countRelatives(Degree, P, Res),
-    atomics_to_string([P, ' had ', Res, ' ', Degrees], R),
+    toWritePlural(Degrees, Res, WPlural),
+    atomics_to_string([P, ' had ', Res, ' ', WPlural], R),
+    write(R).
+
+howMany([How, Many, Degrees, Did, P, Have]) :- 
+    how(How), many(Many), did(Did), have(Have),
+    atomics_to_string([P, " didn't have ", Degrees], R),
     write(R).
 
 didHave([Did, P, Have, Degree]) :-
@@ -340,25 +346,40 @@ didHave([Did, P, Have, Degree]) :-
     atomics_to_string([P, " didn't have ", Degree], R),
     write(R).
 
+writeList([]).
+writeList([H|T]) :-
+    atomics_to_string([H, '\n'], R),
+    write(R),
+    writeList(T).
+
 allOf([All, Degrees, Of, P]) :- 
     all(All), of(Of),
     pluralToSingular(Degrees, Degree),
+    relationship(Degree, _, P),
     setof(P1, relationship(Degree, P1, P), R),
     atomics_to_string(['All ', Degrees, ':\n'], H),
     write(H),
     writeList(R).
 
-request(Words) :-
-    whoIsTo(Words).
+allOf([All, Degrees, Of, P]) :- 
+    all(All), of(Of),
+    atomics_to_string([P, " didn't have ", Degrees], R),
+    write(R).
 
 request(Words) :-
-    howMany(Words).
+    whoIsTo(Words), !.
 
 request(Words) :-
-    didHave(Words).
+    howMany(Words), !.
 
 request(Words) :-
-    allOf(Words).
+    didHave(Words), !.
+
+request(Words) :-
+    allOf(Words), !.
+
+request(_) :-
+    write('Incorrect request').
 ```
 
 Для наибольшего удобства использования сделаем бесконечный цикл, в котором будем считывать список слов вопроса.
