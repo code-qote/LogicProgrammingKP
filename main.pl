@@ -178,6 +178,11 @@ howMany([How, Many, Degrees, Did, P, Have]) :-
     atomics_to_string([P, ' had ', Res, ' ', WPlural], R),
     write(R).
 
+howMany([How, Many, Degrees, Did, P, Have]) :- 
+    how(How), many(Many), did(Did), have(Have),
+    atomics_to_string([P, " didn't have ", Degrees], R),
+    write(R).
+
 didHave([Did, P, Have, Degree]) :-
     did(Did), have(Have), 
     relationship(Degree, _, P),
@@ -198,10 +203,16 @@ writeList([H|T]) :-
 allOf([All, Degrees, Of, P]) :- 
     all(All), of(Of),
     pluralToSingular(Degrees, Degree),
+    relationship(Degree, _, P),
     setof(P1, relationship(Degree, P1, P), R),
     atomics_to_string(['All ', Degrees, ':\n'], H),
     write(H),
     writeList(R).
+
+allOf([All, Degrees, Of, P]) :- 
+    all(All), of(Of),
+    atomics_to_string([P, " didn't have ", Degrees], R),
+    write(R).
 
 request(Words) :-
     whoIsTo(Words), !.
